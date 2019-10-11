@@ -5,65 +5,121 @@ import DateFnsUtils from '@date-io/date-fns';
 import 'date-fns';
 import { ResponsiveLine } from '@nivo/line';
 import { AppContext } from '../../../App';
+import { isWithinInterval, format } from 'date-fns';
+import { isAfter } from 'date-fns/esm';
 
 function defaultInterval() {
+  const today = new Date();
   return {
-    start: new Date(),
-    end: new Date()
+    start: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+    end: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7),
   }
 }
 
 function convertToLineChartData(portions=[], interval=defaultInterval()){
+  const dateFormat = 'yyyy-MM-dd'
+  portions = portions
+    .filter(portion=>isWithinInterval(portion.time, interval))
+    .sort((portion1, portion2)=>isAfter(portion1.time, portion2.time))
+    .map(portion=>({ ...portion, time: format(portion.time, dateFormat) }))
+    .reduce((ac, portion) => {
+      let { kcal, prot, carb, fat } = portion.food;
+      const gram = portion.gram;
+      kcal = Number(Number(ac[portion.time]&&ac[portion.time].kcal||0)+kcal * gram / 100).toFixed(2);
+      prot = Number(Number(ac[portion.time]&&ac[portion.time].prot||0)+prot * gram / 100).toFixed(2);
+      carb = Number(Number(ac[portion.time]&&ac[portion.time].carb||0)+carb * gram / 100).toFixed(2);
+      fat = Number(Number(ac[portion.time]&&ac[portion.time].fat||0)+fat * gram / 100).toFixed(2);
+      return ({ ...ac, [portion.time]: { kcal, prot, carb, fat } });
+    }, {})
   return [
+    {
+      id: "Calories",
+      data: Object.keys(portions).map(key=>({
+        x: key,
+        y: portions[key].kcal
+      }))
+    },
+    {
+      id: "Protein",
+      data: Object.keys(portions).map(key=>({
+        x: key,
+        y: portions[key].prot
+      }))
+    },
+    {
+      id: "Carbohydrate",
+      data: Object.keys(portions).map(key=>({
+        x: key,
+        y: portions[key].carb
+      }))
+    },
+    {
+      id: "Fat",
+      data: Object.keys(portions).map(key=>({
+        x: key,
+        y: portions[key].fat
+      }))
+    }
   ]
-  return testData; 
 }
 
 const useStyles = makeStyles({
-  root: {
-      height: "50vh"
+  chart: {
+      height: "11vh",
+      marginBottom: "20px"
   }
 })
 
 export function ChartPanel() {
   const { state, dispatch } = useContext(AppContext);
-  const data = convertToLineChartData(state.portions);
-  const interval = {...state.chart.interval};
+  const interval = {...(state.chart.interval||defaultInterval())};
+  const data = convertToLineChartData(state.portions, interval);
+  console.log(data);
   const classes = useStyles();
+  function handleDateChange(key, date) {
+    
+      dispatch({type: "CHANGE_CHART_DATE_INTERVAL", payload: { interval: { ...interval, [key]: date} } });
+  }
   return (
       <Grid container>
           <Grid container>
               <Grid item xs={12}>
                   <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                      <KeyboardDatePicker />
-                      <KeyboardDatePicker />
+                    {['start', 'end'].map(key=>
+                        <KeyboardDatePicker key={key}
+                        format="dd-MMM-yyyy"
+                        onChange={date=>handleDateChange(key, date)}
+                        value={interval[key]}
+                      />
+                      )}
                   </MuiPickersUtilsProvider>
               </Grid>
           </Grid>
-          <Grid container className={classes.root}>
+          {data.map((dataSet, index) => (
+          <Grid container key={index} className={classes.chart}>
               <Grid item xs={8}>
               <ResponsiveLine
-                  data={data}
-                  margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
-                  xScale={{ type: 'point' }}
+                  data={[data[index]]}
+                  margin={{ top: 10, right: 110, bottom: 10, left: 60 }}
+                  // margin={{ top: 20, right: 20, bottom: 60, left: 80 }}
+                  // xScale={{ type: 'linear' , min: 'auto', max: 'auto'}}
+                  xScale={{type: 'time', format: '%Y-%m-%d', precision: 'day'}}
+                  xFormat="time:%Y-%m-%d"
                   yScale={{ type: 'linear', stacked: true, min: 'auto', max: 'auto' }}
                   axisTop={null}
                   axisRight={null}
                   axisBottom={{
-                      orient: 'bottom',
-                      tickSize: 5,
-                      tickPadding: 5,
-                      tickRotation: 0,
-                      legend: 'transportation',
-                      legendOffset: 36,
-                      legendPosition: 'middle'
+                    format: '%b %d',
+                    tickValues: 'every 2 days',
+                    legend: 'time',
+                    legendOffset: -12
                   }}
                   axisLeft={{
                       orient: 'left',
                       tickSize: 5,
                       tickPadding: 5,
                       tickRotation: 0,
-                      legend: 'count',
+                      legend: 'amount',
                       legendOffset: -40,
                       legendPosition: 'middle'
                   }}
@@ -101,284 +157,10 @@ export function ChartPanel() {
                           ]
                       }
                   ]}
-              />   
-
-                  
+              />  
               </Grid>
           </Grid>
+          ))}
       </Grid>
   )
 }
-
-var testData = [
-    {
-      "id": "japan",
-      "color": "hsl(285, 70%, 50%)",
-      "data": [
-        {
-          "x": "plane",
-          "y": 263
-        },
-        {
-          "x": "helicopter",
-          "y": 127
-        },
-        {
-          "x": "boat",
-          "y": 131
-        },
-        {
-          "x": "train",
-          "y": 27
-        },
-        {
-          "x": "subway",
-          "y": 63
-        },
-        {
-          "x": "bus",
-          "y": 226
-        },
-        {
-          "x": "car",
-          "y": 231
-        },
-        {
-          "x": "moto",
-          "y": 188
-        },
-        {
-          "x": "bicycle",
-          "y": 56
-        },
-        {
-          "x": "horse",
-          "y": 66
-        },
-        {
-          "x": "skateboard",
-          "y": 286
-        },
-        {
-          "x": "others",
-          "y": 214
-        }
-      ]
-    },
-    {
-      "id": "france",
-      "color": "hsl(320, 70%, 50%)",
-      "data": [
-        {
-          "x": "plane",
-          "y": 264
-        },
-        {
-          "x": "helicopter",
-          "y": 163
-        },
-        {
-          "x": "boat",
-          "y": 94
-        },
-        {
-          "x": "train",
-          "y": 280
-        },
-        {
-          "x": "subway",
-          "y": 177
-        },
-        {
-          "x": "bus",
-          "y": 271
-        },
-        {
-          "x": "car",
-          "y": 42
-        },
-        {
-          "x": "moto",
-          "y": 282
-        },
-        {
-          "x": "bicycle",
-          "y": 32
-        },
-        {
-          "x": "horse",
-          "y": 232
-        },
-        {
-          "x": "skateboard",
-          "y": 226
-        },
-        {
-          "x": "others",
-          "y": 186
-        }
-      ]
-    },
-    {
-      "id": "us",
-      "color": "hsl(151, 70%, 50%)",
-      "data": [
-        {
-          "x": "plane",
-          "y": 190
-        },
-        {
-          "x": "helicopter",
-          "y": 8
-        },
-        {
-          "x": "boat",
-          "y": 94
-        },
-        {
-          "x": "train",
-          "y": 255
-        },
-        {
-          "x": "subway",
-          "y": 125
-        },
-        {
-          "x": "bus",
-          "y": 105
-        },
-        {
-          "x": "car",
-          "y": 182
-        },
-        {
-          "x": "moto",
-          "y": 287
-        },
-        {
-          "x": "bicycle",
-          "y": 184
-        },
-        {
-          "x": "horse",
-          "y": 249
-        },
-        {
-          "x": "skateboard",
-          "y": 176
-        },
-        {
-          "x": "others",
-          "y": 275
-        }
-      ]
-    },
-    {
-      "id": "germany",
-      "color": "hsl(257, 70%, 50%)",
-      "data": [
-        {
-          "x": "plane",
-          "y": 63
-        },
-        {
-          "x": "helicopter",
-          "y": 195
-        },
-        {
-          "x": "boat",
-          "y": 229
-        },
-        {
-          "x": "train",
-          "y": 135
-        },
-        {
-          "x": "subway",
-          "y": 27
-        },
-        {
-          "x": "bus",
-          "y": 4
-        },
-        {
-          "x": "car",
-          "y": 150
-        },
-        {
-          "x": "moto",
-          "y": 114
-        },
-        {
-          "x": "bicycle",
-          "y": 156
-        },
-        {
-          "x": "horse",
-          "y": 80
-        },
-        {
-          "x": "skateboard",
-          "y": 84
-        },
-        {
-          "x": "others",
-          "y": 272
-        }
-      ]
-    },
-    {
-      "id": "norway",
-      "color": "hsl(221, 70%, 50%)",
-      "data": [
-        {
-          "x": "plane",
-          "y": 67
-        },
-        {
-          "x": "helicopter",
-          "y": 213
-        },
-        {
-          "x": "boat",
-          "y": 259
-        },
-        {
-          "x": "train",
-          "y": 135
-        },
-        {
-          "x": "subway",
-          "y": 223
-        },
-        {
-          "x": "bus",
-          "y": 0
-        },
-        {
-          "x": "car",
-          "y": 253
-        },
-        {
-          "x": "moto",
-          "y": 118
-        },
-        {
-          "x": "bicycle",
-          "y": 77
-        },
-        {
-          "x": "horse",
-          "y": 13
-        },
-        {
-          "x": "skateboard",
-          "y": 89
-        },
-        {
-          "x": "others",
-          "y": 111
-        }
-      ]
-    }
-  ]

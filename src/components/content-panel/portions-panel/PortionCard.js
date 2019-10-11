@@ -54,7 +54,7 @@ export function PortionCard() {
                                 <Typography>{field.title + ": "}</Typography>
                             </Grid>
                             <Grid item xs={3}>
-                                <Typography>{food[field.key]}</Typography>
+                                <Typography>{Number(food[field.key] * portion.gram / 100).toFixed(2)}</Typography>
                             </Grid>
                             <Grid item xs={3}>
                                 <Typography>{Number(food[field.key] / norm[field.key] * portion.gram).toFixed(2) + "%"}</Typography>

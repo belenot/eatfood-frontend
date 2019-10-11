@@ -3,7 +3,20 @@ import { NOT_FOUND_IMG } from "./constants"
 export const initState = {
     client: {
         login: '',
-        name: ''
+        name: '',
+        authenticated: false
+    },
+    authenticationPage: {
+        authentication: {
+            login: '',
+            password: '',
+        },
+        registration: {
+            login: '',
+            password: '',
+            name: ''
+        },
+        page: 'authentication'
     },
     foods: [],
     portions: [],
@@ -38,7 +51,21 @@ export const nutTemplates = {
 export const testState = {
     client: {
         login: 'belenot',
-        name: 'Serg'
+        name: 'Serg',
+        authenticated: false
+    },
+    authenticationPage: {
+        authentication: {
+            login: '',
+            password: '',
+        },
+        registration: {
+            login: '',
+            password: '',
+            name: ''
+        },
+        page: 'authentication',
+        error: ''
     },
     foods: [
         { id: 1, name: "food1", kcal: 300, prot: 10, carb: 40, fat: 10 },
@@ -53,10 +80,10 @@ export const testState = {
         { id: 10, name: "food10", kcal: 310, prot: 20, carb: 50, fat: 20 }
     ],
     portions: [
-        { id: 1, gram: 101, time: new Date("2019-10-06T12:00:00"),
+        { id: 1, gram: 101, time: new Date("2019-10-12T12:00:00"),
         food: { id: 1, name: "food1", kcal: 300, prot: 10, carb: 40, fat: 10 }
      },
-        { id: 2, gram: 102, time: new Date("2019-10-06T13:00:00"),
+        { id: 2, gram: 102, time: new Date("2019-10-12T13:00:00"),
         food: { id: 2, name: "food2", kcal: 302, prot: 12, carb: 42, fat: 12 }
      }
     ],
@@ -71,9 +98,6 @@ export const testState = {
         portion: null
     },
     chart: {
-        interval: {
-            begin: '',
-            end: ''
-        }
+        interval: null
     }
 }
