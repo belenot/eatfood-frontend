@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import './App.css';
 
 import {Container, Grid} from '@material-ui/core'
@@ -25,6 +25,17 @@ function App() {
   const [state, dispatch] = useReducer(reducer, {...testState});
   const client = state.client
   const classes = useStyles();
+  useEffect(function(){
+    fetch("/client/me").then(function (response) {
+      if (response.ok) {
+        response.json().then(client=>dispatch({type: 'INIT_CLIENT_OK', payload: {client}}))
+        api.getFoods(foods=>dispatch({type: 'INIT_FOODS_OK', payload: {foods}}));
+        api.getPortions(portions=>dispatch({type: 'INIT_PORTIONS_OK', payload: {portions}}));
+      } else {
+        dispatch({type: 'INIT_CLIENT_ERROR'})
+      }
+    })
+  }, [])
   return (
       <AppContext.Provider value={{state, dispatch, api: api}}>
         <Container id="app-container">

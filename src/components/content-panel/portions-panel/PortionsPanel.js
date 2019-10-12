@@ -5,6 +5,12 @@ import { AppContext } from "../../../App";
 import { FoodCard } from "../foods-panel/FoodCard";
 import { Grid, Select, MenuItem } from "@material-ui/core";
 import { PortionCard } from "./PortionCard";
+import DateFnsUtils from "@date-io/date-fns";
+import { format } from "date-fns";
+
+
+const dateFormat = "yyyy-MM-dd'T00:00";
+// make input date visible or formate it
 
 export function PortionsPanel() {
     const { state, dispatch } = useContext(AppContext);
@@ -13,25 +19,35 @@ export function PortionsPanel() {
     function addPortion(newPortion) {
         console.log("New portion: " + JSON.stringify(newPortion));
         return new Promise(function(resolve, reject) {
-            dispatch({type:"ADD_PORTION", payload: { 
-                portion: { ...newPortion, 
-                    food: { ...foods.find(food=>food.id==selectedFood.id) }
-                } 
-            } });
+            api.createPortion({...newPortion, 
+                time: format(newPortion.time, dateFormat), 
+                foodId: selectedFood.id
+            },
+                portion=>dispatch({type:"ADD_PORTION", payload: { portion }})
+            );
             resolve();
         })
     }
     function deletePortion(oldPortion) {
         return new Promise(function(resolve, reject) {
-            dispatch({type:"DELETE_PORTION", payload: {portion: {...oldPortion} } })
+            api.deletePortion(oldPortion.id,
+                ()=>dispatch({type:"DELETE_PORTION", payload: {portion: {...oldPortion} } })
+            )
             resolve();
         })
     }
     function updatePortion(newPortion, oldPortion) {
         const foodId = selectedFood.id;
         const foodName = selectedFood.name;
-        return new Promise(function(resolve, reject) {            
-            dispatch({type:"UPDATE_PORTION", payload: { portion: { ...newPortion, food: { ...foods.find(food=>food.id==foodId)} } } });
+        return new Promise(function(resolve, reject) {
+            api.updatePortion(
+                oldPortion.id, {
+                    ...newPortion, 
+                    time: format(newPortion.time, dateFormat), 
+                    foodId: selectedFood.id
+                },
+                portion=>dispatch({type:"UPDATE_PORTION", payload: { portion }})
+            );
             setSelectedFood({name: "", id: ""});
             resolve();
         })

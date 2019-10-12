@@ -18,26 +18,32 @@ const useStyles = makeStyles({
 
 export const FoodsPanel = () => {
     const classes = useStyles();
-    const { state, dispatch } = useContext(AppContext);
+    const { state, dispatch, api } = useContext(AppContext);
     const { foods, viewedFood } = state;
     const [editFoodForm, setEditFoodForm] = useState({show: false, food: null});
     function addFood(newFood) {
         console.log("add was called");
         return new Promise(function(resolve, reject){
             console.log("add promise is executing");
-            dispatch({type:"ADD_FOOD", payload: {food: {...newFood}}});
+            api.createFood(newFood, 
+                dispatch({type:"ADD_FOOD", payload: {food: {...newFood}}})
+            )
             resolve();
         })
     }
     function deleteFood(oldFood) {
         return new Promise(function(resolve, reject){
-            dispatch({type:"DELETE_FOOD", payload: {food: {...oldFood}}});
+            api.deleteFood(oldFood.id,
+                dispatch({type:"DELETE_FOOD", payload: {food: {...oldFood}}})
+            )
             resolve();
         })
     }
     function updateFood(newFood, oldFood) {
         return new Promise(function(resolve, reject) {
-            dispatch({type: "UPDATE_FOOD", payload: {food: {...newFood}}});
+            api.updateFood(oldFood.id, newFood, 
+                dispatch({type: "UPDATE_FOOD", payload: {food: {...newFood}}})
+            )
             resolve();
         })
     }

@@ -31,7 +31,7 @@ export function AuthenticationPanel() {
         }
     }
     return (
-        <Grid container id={`${page}-page`} xs={4}>
+        <Grid container id={`${page}-page`}>
             <Grid item xs={12}>
                 <Tabs value={page} onChange={handleChangePage}>
                     <Tab label='Sign in' value='authentication' />

@@ -19,6 +19,22 @@ export function reducer (state={}, action= {type:'',payload:{}}) {
     const {type, payload} = action;
     var newState;
     switch (type) {
+        case 'INIT_CLIENT_OK': {
+            newState = { ...state, client: {...payload.client, authenticated: true}}
+            break;
+        }
+        case 'INIT_CLIENT_ERROR': {
+            newState = { ...state, authenticated: false}
+            break;
+        }
+        case 'INIT_FOODS_OK': {
+            newState = { ...state, foods: [ ...payload.foods] }
+            break;
+        }
+        case 'INIT_PORTIONS_OK': {
+            newState = { ...state, portions: [ ...payload.portions ]}
+            break;
+        }
         case 'AUTHENTICATION_PAGE_CHANGE': {
             newState = { ...state, authenticationPage: { ...state.authenticationPage, page: payload.page}}
             break;
