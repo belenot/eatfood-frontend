@@ -4,11 +4,14 @@ import './App.css';
 import {Container, Grid} from '@material-ui/core'
 import { initState, testState } from './utils/states';
 import { reducer } from './utils/reducers';
-import { Header } from './components/authentication-padge/header/Header';
+import { Header } from './components/header/Header';
 import { ContentPanel } from './components/content-panel/ContentPanel';
 import { makeStyles } from '@material-ui/styles';
-import { AuthenticationPanel } from './components/AuthenricationPage';
+import { AuthenticationPanel } from './components/authentication-page/AuthenricationPage';
 import { testApi } from './api/testApi';
+import { api } from './api/api';
+
+window.api = api;
 
 export const AppContext = React.createContext();
 
@@ -23,7 +26,7 @@ function App() {
   const client = state.client
   const classes = useStyles();
   return (
-      <AppContext.Provider value={{state, dispatch, api: testApi}}>
+      <AppContext.Provider value={{state, dispatch, api: api}}>
         <Container id="app-container">
           <Grid container alignItems='center' alignContent='center' justify='center'>
             {client.authenticated

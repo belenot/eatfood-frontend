@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { AppContext } from '../../../App';
+import { AppContext } from '../../App';
 import { Grid, Typography, Button, Input } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { sizeHeight } from '@material-ui/system';
@@ -16,10 +16,11 @@ const useStyles = makeStyles({
 })
 
 export const Header = ({className}) => {
-    const {state, dispatch} = useContext(AppContext);
+    const {state, dispatch, api} = useContext(AppContext);
     const {login, name} = state.client;
     const classes = useStyles();
     function handleExitButton() {
+        api.logout();
         dispatch({type: "LOGOUT"});
     }
     return (

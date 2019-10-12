@@ -45,7 +45,7 @@ export function reducer (state={}, action= {type:'',payload:{}}) {
         case 'AUTHENTICATION_PAGE_SIGNIN_ERROR': {
             newState = { ...initState,
                 authenticationPage: { ...state.authenticationPage,
-                    error: payload.error.message
+                    error: payload.error
                 }
             };
             break;
@@ -62,7 +62,7 @@ export function reducer (state={}, action= {type:'',payload:{}}) {
         case 'AUTHENTICATION_PAGE_SIGNUP_ERROR': {
             newState = { ...initState,
                 authenticationPage: { ...state.authenticationPage,
-                    error: payload.error.message
+                    error: payload.error
                 }
             };
             break;

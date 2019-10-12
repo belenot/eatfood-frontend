@@ -1,5 +1,5 @@
 import React, { useContext } from "react"
-import { AppContext } from "../App"
+import { AppContext } from "../../App"
 import { Card, TextField, Button, CardContent, CardHeader, Tabs, Tab, Grid, Typography } from "@material-ui/core";
 
 export function AuthenticationPanel() {
