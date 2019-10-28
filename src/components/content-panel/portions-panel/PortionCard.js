@@ -16,7 +16,7 @@ const useStyles = makeStyles({
 export function PortionCard() {
     const {state, dispatch} = useContext(AppContext);
     const { portion, img } = state.viewedPortion;
-    const food = portion.food;
+    const food = state.foods.find(f=>f.id==portion.foodId);
     const classes = useStyles();
     console.log(portion);
     const norm = {...nutTemplates.common};

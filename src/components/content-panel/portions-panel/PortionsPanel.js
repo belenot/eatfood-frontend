@@ -7,6 +7,8 @@ import { Grid, Select, MenuItem } from "@material-ui/core";
 import { PortionCard } from "./PortionCard";
 import DateFnsUtils from "@date-io/date-fns";
 import { format } from "date-fns";
+import { DatePicker, KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
+import KeyboardDateInput from "@material-ui/pickers/_shared/KeyboardDateInput";
 
 
 const dateFormat = "yyyy-MM-dd'T00:00";
@@ -16,6 +18,7 @@ export function PortionsPanel() {
     const { state, dispatch } = useContext(AppContext);
     const { foods, portions, viewedPortion } = state;
     const [selectedFood, setSelectedFood] = useState({name: "", id: ""});
+    const [selectedDate, setSelectedDate] = useState(new Date());
     function addPortion(newPortion) {
         console.log("New portion: " + JSON.stringify(newPortion));
         return new Promise(function(resolve, reject) {
@@ -43,7 +46,7 @@ export function PortionsPanel() {
             api.updatePortion(
                 oldPortion.id, {
                     ...newPortion, 
-                    time: format(newPortion.time, dateFormat), 
+                    time: selectedDate, 
                     foodId: selectedFood.id
                 },
                 portion=>dispatch({type:"UPDATE_PORTION", payload: { portion }})
@@ -57,6 +60,9 @@ export function PortionsPanel() {
     }
     function handleSelectFood(event) {
         setSelectedFood({id: event.target.value, name: foods.find(f=>f.id == event.target.value).name});
+    }
+    function handleSelectedDate(event, value) {
+        setSelectedDate(value);
     }
     return (
         <Grid container>
@@ -80,7 +86,11 @@ export function PortionsPanel() {
                             )
                         },
                         { title: "Portion (gr)", field: "gram" },
-                        { title: "Time", field: "time", type:"datetime" },
+                        { 
+                            title: "Time", 
+                            field: "time", 
+                            type:"date",
+                        },
                     ]}
                     options={{pageSizeOptions:[]}}
                     editable={{

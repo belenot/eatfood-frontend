@@ -49,6 +49,16 @@ function updateFood(id, updateFoodForm, resolve, reject) {
 function getFoods(resolve, reject) {
     get('/food/get', resolve, reject);
 }
+//TODO
+//CHECK AFTER INSTALLING WEBPACK
+function getPortionsByFilter(portionFilterForm, pageable, resolve, reject) {
+    const {gteGram, lteGram, afterDate, beforeDate, foodIdList} = portionFilterForm;
+    const {offset, size, page, sort} = pageable;
+    const params = {gteGram, lteGram, afterDate, beforeDate, foodIdList, offset, size, page, sort};
+    const url = "/portion/get/filter?"+Object.keys(params).reduce((a,k)=>a+(params[k]?`${k}=${encodeURIComponent(params[k])}&`:''), "").slice(0, -1);
+    get(url, resolve, reject);
+
+}
 function createPortion(createPortionForm, resolve, reject) {
     post('/portion/create', createPortionForm, resolve, reject);
 }
@@ -83,5 +93,6 @@ export const api = {
     deletePortion,
     updatePortion,
     getPortions,
-    getPortionsByFood
+    getPortionsByFood,
+    getPortionsByFilter
 }
