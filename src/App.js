@@ -39,7 +39,7 @@ function App() {
   return (
       <AppContext.Provider value={{state, dispatch, api: api}}>
         <Container id="app-container">
-          <Grid container alignItems='center' alignContent='center' justify='center'>
+          {/* <Grid container alignItems='center' alignContent='center' justify='center'> */}
             {client.authenticated
             ?
             <React.Fragment>
@@ -49,7 +49,7 @@ function App() {
             :
             <AuthenticationPanel /> 
             }
-          </Grid>
+          {/* </Grid> */}
         </Container>
       </AppContext.Provider>
     
