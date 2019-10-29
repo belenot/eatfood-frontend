@@ -23,15 +23,17 @@ export const ContentPanel = ({className}) => {
         setCurrentTab(tab);
     }
     return (
-        <Grid item container className={classes.container}>
-            <Grid item container >
-                <Tabs onChange={handleTabClick} value={currentTab}>
-                    <Tab label="Foods" value="foods"/>
-                    <Tab label="Portions" value="portions"/>
-                    <Tab label="Chart" value="chart"/>
-                </Tabs>
+        <Grid item container className={classes.container} direction="column" wrap='nowrap'>
+            <Grid item container>
+                <Grid item>
+                    <Tabs onChange={handleTabClick} value={currentTab}>
+                        <Tab label="Foods" value="foods"/>
+                        <Tab label="Portions" value="portions"/>
+                        <Tab label="Chart" value="chart"/>
+                    </Tabs>
+                </Grid>
             </Grid>
-            <Grid item container >
+            <Grid item xs={12}>
                 {
                     currentTab=='foods'?
                         <FoodsPanel/>:

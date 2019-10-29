@@ -3,7 +3,7 @@ import MaterialTable from "material-table";
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import { AppContext } from "../../../App";
 import { FoodCard } from "../foods-panel/FoodCard";
-import { Grid, Select, MenuItem } from "@material-ui/core";
+import { Grid, Select, MenuItem, makeStyles } from "@material-ui/core";
 import { PortionCard } from "./PortionCard";
 import DateFnsUtils from "@date-io/date-fns";
 import { format } from "date-fns";
@@ -11,10 +11,20 @@ import { DatePicker, KeyboardDatePicker, MuiPickersUtilsProvider } from "@materi
 import KeyboardDateInput from "@material-ui/pickers/_shared/KeyboardDateInput";
 
 
+const useStyles = makeStyles({
+    root: {
+        height: "100%"        
+    },
+    paper: {
+        maxHeight: "100%"
+    }
+})
 const dateFormat = "yyyy-MM-dd'T00:00";
 // make input date visible or formate it
 
+
 export function PortionsPanel() {
+    const classes = useStyles();
     const { state, dispatch } = useContext(AppContext);
     const { foods, portions, viewedPortion } = state;
     const [selectedFood, setSelectedFood] = useState({name: "", id: ""});
@@ -65,7 +75,7 @@ export function PortionsPanel() {
         setSelectedDate(value);
     }
     return (
-        <Grid container>
+        <Grid container className={classes.root}>
             <Grid item xs={8}>
                 <MaterialTable 
                     title="Portions"
@@ -92,7 +102,7 @@ export function PortionsPanel() {
                             type:"date",
                         },
                     ]}
-                    options={{pageSizeOptions:[]}}
+                    options={{pageSizeOptions:[], pageSize:10}}
                     editable={{
                         onRowAdd: addPortion,
                         onRowUpdate: updatePortion,

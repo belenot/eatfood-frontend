@@ -8,8 +8,7 @@ import { FoodCard } from './FoodCard';
 
 const useStyles = makeStyles({
     root: {
-        height: "200px",
-        color: "red"
+        height: "100%"        
     },
     paper: {
         maxHeight: "100%"
@@ -51,7 +50,7 @@ export const FoodsPanel = () => {
         dispatch({type: "OPEN_VIEWED_FOOD", payload: {foodId: foodData.id, show: true}});
     }
     return (
-        <Grid container>
+        <Grid container className={classes.root}>
             <Grid item xs={8}>
                 <MaterialTable
                     columns={[
@@ -63,7 +62,7 @@ export const FoodsPanel = () => {
                     ]}
                     data={foods.map(food=>food)}
                     title="Foods"
-                    options={{pageSizeOptions:[]}}
+                    options={{pageSizeOptions:[],pageSize:10}}
                     editable={{
                         onRowAdd: addFood,
                         onRowUpdate: updateFood,
