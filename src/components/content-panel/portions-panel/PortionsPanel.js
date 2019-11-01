@@ -1,15 +1,25 @@
 import MaterialTable from "material-table";
 
-import React, { useContext, useState, useRef, useEffect } from 'react';
+import React, { useContext, useState, useRef, useReducer } from 'react';
 import { AppContext } from "../../../App";
-import { FoodCard } from "../foods-panel/FoodCard";
-import { Grid, Select, MenuItem, makeStyles } from "@material-ui/core";
+import { Grid, Select, MenuItem, makeStyles, Typography, Input, TextField, Table, TableRow, TableHead, TableCell, TableBody } from "@material-ui/core";
 import { PortionCard } from "./PortionCard";
-import DateFnsUtils from "@date-io/date-fns";
 import { format } from "date-fns";
-import { DatePicker, KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
-import KeyboardDateInput from "@material-ui/pickers/_shared/KeyboardDateInput";
+import { KeyboardDatePicker } from "@material-ui/pickers";
 
+const portionsPanelState = {
+    page: 0,
+    rowCount: 10,
+    portions: [],
+    filter: {},
+    editedPortion: {
+        edited: false,
+        id: 0,
+        gram: 0,
+        date: null,
+        foodId: 0
+    }
+}
 
 const useStyles = makeStyles({
     root: {
@@ -19,24 +29,53 @@ const useStyles = makeStyles({
         maxHeight: "100%"
     }
 })
-const dateFormat = "yyyy-MM-dd'T00:00";
+const dateFormat = "yyyy-MM-dd";
 // make input date visible or formate it
 
+function EditFoodColumn({value, foods, onChange}) {
+    return (
+        <Select 
+            value={value}
+            onChange={e=>onChange(e.target.value)}
+        >
+        {foods.map(food=>
+            <MenuItem key={food.id} value={food.id}>{food.name}</MenuItem>
+        )}
+        </Select>
+    )
+}
 
-export function PortionsPanel() {
+function EditDateColumn({value, onChange}) {
+    return (
+        <KeyboardDatePicker
+            disableToolbar
+            variant="inline"
+            format={dateFormat}
+            value={value}
+            onChange={onChange}
+        />
+    )
+}
+
+export function PortionsPanel({foods, editedFoods, actions}) {
     const classes = useStyles();
-    const { state, dispatch } = useContext(AppContext);
-    const { foods, portions, viewedPortion } = state;
-    const [selectedFood, setSelectedFood] = useState({name: "", id: ""});
-    const [selectedDate, setSelectedDate] = useState(new Date());
-    function addPortion(newPortion) {
-        console.log("New portion: " + JSON.stringify(newPortion));
+    // const { state, dispatch } = useContext(AppContext);
+    const { state, dispatch } = useReducer();
+    // const { foods, portions, viewedPortion } = state;
+    // const [editablePortion, setEditablePortion] = useState({
+    //     foodId: null,
+    //     date: format(new Date(), dateFormat),
+    //     gram: 0
+    // })
+    const [isEdit, setIsEdit] = useState(false);
+    const [editFoodId, setEditFoodId] = useState(null);
+    const [editDate, setEditDate] = useState(format(new Date(), dateFormat))
+    const [editGram, setEditGram] = useState(0)
+    function addPortion() {
         return new Promise(function(resolve, reject) {
-            api.createPortion({...newPortion, 
-                time: format(newPortion.time, dateFormat), 
-                foodId: selectedFood.id
-            },
-                portion=>dispatch({type:"ADD_PORTION", payload: { portion }})
+            api.createPortion(
+                {foodId: editFoodId, gram: editGram, date: editDate},
+                portion=>appDispatch({type:"ADD_PORTION", payload: { portion }})
             );
             resolve();
         })
@@ -50,65 +89,77 @@ export function PortionsPanel() {
         })
     }
     function updatePortion(newPortion, oldPortion) {
-        const foodId = selectedFood.id;
-        const foodName = selectedFood.name;
         return new Promise(function(resolve, reject) {
             api.updatePortion(
-                oldPortion.id, {
-                    ...newPortion, 
-                    time: selectedDate, 
-                    foodId: selectedFood.id
-                },
+                oldPortion.id, 
+                {foodId: editFoodId, gram: editGram, date: editDate},
                 portion=>dispatch({type:"UPDATE_PORTION", payload: { portion }})
             );
-            setSelectedFood({name: "", id: ""});
+            // setEditablePortion({foodId: "", gram: 0, date: format(new Date(), 'yyyy-MM-dd')});
+
             resolve();
         })
     }
     function showPortion(event, portionData) {
         dispatch({type: "OPEN_VIEWED_PORTION", payload: { portion: {...portionData}, show: true}});
     }
-    function handleSelectFood(event) {
-        setSelectedFood({id: event.target.value, name: foods.find(f=>f.id == event.target.value).name});
+    function handleEditPortion(key, value) {
+        console.log(`Edit portion[${key}]:${value}`)
+        setEditablePortion({...editablePortion, [key]: value});
     }
-    function handleSelectedDate(event, value) {
-        setSelectedDate(value);
+    function getFoodName(id) {
+        return foods.find(food=>food.id == id);
+    }
+    function computeSelectedFood(props) {
+        if (props.rowData) {
+            if (props.rowData.foodId) return props.rowData.foodId
+        } 
+        if (editFoodId) return editFoodId;
+        return "default"
+    }
+    function computeSelectedDate(props) {
+        if (props.rowData) {
+            if (props.rowData.date) return props.rowData.date
+        }
+        if (editDate) return editDate
+        return format(new Date(), dateFormat);
+    }
+    function computeSelectedGram(props) {
+        if (props.rowData) {
+            if (props.rowData.gram) return props.rowData.gram
+        }
+        return editGram
     }
     return (
         <Grid container className={classes.root}>
             <Grid item xs={8}>
                 <MaterialTable 
-                    title="Portions"
-                    data={[...portions]}
-                    columns={[
-                        { 
-                            title: "Food", 
-                            field: "food.name",
-                            editComponent: props => (
-                                <Select
-                                    value={selectedFood.id}
-                                    onChange={handleSelectFood}
-                                >
-                                    {foods.map(f=>
-                                    <MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>
-                                    )}
-                                </Select>
-                            )
-                        },
-                        { title: "Portion (gr)", field: "gram" },
-                        { 
-                            title: "Time", 
-                            field: "time", 
-                            type:"date",
-                        },
-                    ]}
-                    options={{pageSizeOptions:[], pageSize:10}}
-                    editable={{
-                        onRowAdd: addPortion,
-                        onRowUpdate: updatePortion,
-                        onRowDelete: deletePortion
-                    }}
-                    onRowClick={showPortion}
+                data={portions.map(portion=>({...portion, foodName: foods.find(food=>food.id==portion.foodId).name}))}
+                columns={[
+                    { title: "Food", field: "foodName", editComponent: props=>(
+                        <Select value={computeSelectedFood(props)} onChange={e=>setEditFoodId(e.target.value)}>                            
+                            {foods.map(food=>
+                                <MenuItem key={food.id} value={food.id}>{food.name}</MenuItem>
+                            )}
+                        </Select>
+                    ) },
+                    { title: "Portion (gr)", field: "gram", editComponent: props=>(
+                        <TextField value={computeSelectedGram(props)} onChange={e=>setEditGram(e.target.value)}/>
+                    ) },
+                    { title: "Date", field: "date", editComponent: props=>(
+                        <KeyboardDatePicker 
+                            variant="inline" 
+                            format="yyyy-MM-dd" 
+                            value={computeSelectedDate(props)}
+                            onChange={value=>setEditDate(format(value, dateFormat))}
+                        />
+                    ) }
+                ]}
+                editable={{
+                    onRowAdd: addPortion,
+                    onRowUpdate: updatePortion,
+                    onRowDelete: deletePortion
+                }}
                 />
             </Grid>
             {viewedPortion.show&&

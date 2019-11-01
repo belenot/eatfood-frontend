@@ -10,6 +10,8 @@ import { makeStyles } from '@material-ui/styles';
 import { AuthenticationPanel } from './components/authentication-page/AuthenricationPage';
 import { testApi } from './api/testApi';
 import { api } from './api/api';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
 
 window.api = api;
 
@@ -38,19 +40,22 @@ function App() {
   }, [])
   return (
       <AppContext.Provider value={{state, dispatch, api: api}}>
-        <Container id="app-container">
-          {/* <Grid container alignItems='center' alignContent='center' justify='center'> */}
-            {client.authenticated
-            ?
-            <React.Fragment>
-              <Header />
-              <ContentPanel />
-            </React.Fragment>
-            :
-            <AuthenticationPanel /> 
-            }
-          {/* </Grid> */}
-        </Container>
+        {/* new added */}
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <Container id="app-container">
+            {/* <Grid container alignItems='center' alignContent='center' justify='center'> */}
+              {client.authenticated
+              ?
+              <React.Fragment>
+                <Header />
+                <ContentPanel />
+              </React.Fragment>
+              :
+              <AuthenticationPanel /> 
+              }
+            {/* </Grid> */}
+          </Container>
+        </MuiPickersUtilsProvider>
       </AppContext.Provider>
     
   );
