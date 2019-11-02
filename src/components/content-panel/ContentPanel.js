@@ -14,6 +14,7 @@ const useStyles = makeStyles({
     }
 })
 
+
 export const ContentPanel = ({className}) => {
     const {state, dispatch} = useContext(AppContext);
     const [currentTab, setCurrentTab] = useState("foods");

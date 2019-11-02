@@ -1,5 +1,8 @@
 import { NOT_FOUND_IMG } from "./constants";
 import { initState } from "./states";
+import { format } from "date-fns";
+
+const dateFormat = 'yyyy-MM-dd';
 
 function removeDisplayedError(oldState, newState) {
     if (oldState.authenticationPage.error) {
@@ -162,7 +165,90 @@ export function reducer (state={}, action= {type:'',payload:{}}) {
             };
             break;
         }
-        default: console.warn(`Not found handler for ${type} action`);
+        case 'ON_ADD_PORTION': {
+            newState = {
+                ...state,
+                portions: [{isAdding: true, old: null, value: {id: "new-"+new Date(), foodId: "", gram: 0, date: format(new Date(), dateFormat)}}, ...state.portions]
+            }
+            break;
+        }
+        case 'ON_PORTION_ROW_CHECK': {
+            newState = {
+                ...state,
+                portions: state.portions.map(portion=>portion.value.id==payload.id ? (
+                    {...portion, isChecked: !portion.isChecked}
+                ) : (
+                    portion
+                ))
+            }
+            break;
+        }
+        case 'ON_DELETE_CHECKED_PORTIONS': {
+            newState = {
+                ...state,
+                portions: state.portions.filter(portion=>!portion.isChecked)
+            }
+            break;
+        }
+        case 'ON_PORTION_ROW_EDIT': {
+            newState = {
+                ...state, 
+                portions: state.portions.map(portion=>portion.value.id==payload.id ? (
+                    {...portion, isEditing: true, old: {...portion.value}}
+                ) : (
+                    portion
+                ))
+            }
+            break;
+        }
+        case 'HANDLE_PORTION_ROW_EDIT_CHANGE': {
+            newState = {
+                ...state,
+                portions: state.portions.map(portion=>portion.value.id==payload.id ? (
+                    {...portion, value: {...portion.value, [payload.key]: payload.value}}
+                ) : (
+                    portion
+                ))
+            }
+            break;
+        }
+        case 'ON_PORTION_ROW_EDIT_BREAK': {
+            newState = {
+                ...state,
+                portions: state.portions.map(function(portion){
+                    if (portion.value.id==payload.id && portion.isEditing) {
+                        return {...portion, isEditing: false, value: {...portion.old}, old: null}
+                    } else if (portion.value.id==payload.id && portion.isAdding) {
+                        return undefined;
+                    } else {
+                        return portion
+                    }
+                }).filter(portion=>portion!==undefined)
+            }
+            break;
+        }
+        case 'ON_PORTION_ROW_EDIT_DONE': {
+            newState = {
+                ...state,
+                portions: state.portions.map(portion=>portion.value.id==payload.id ? (
+                    {...portion, isEditing: false, isAdding: false, old: null}
+                ) : (
+                    portion
+                ))
+            }
+            break;
+        }
+        case 'ON_PORTION_DELETE': {
+            newState = {
+                ...state,
+                portions: state.portions.filter(portion=>portion.value.id!=payload.id)
+            }
+            break;
+        }
+        default: {
+            console.warn(`Not found handler for ${type} action`);
+            newState = state;
+        }
     }
     return postProcess(state, newState);
 }

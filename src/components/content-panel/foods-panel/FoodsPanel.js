@@ -60,7 +60,7 @@ export const FoodsPanel = () => {
                         { title: "Carbohydrate (gr)", field: "carb" },
                         { title: "Fat (gr)", field: "fat" }
                     ]}
-                    data={foods.map(food=>food)}
+                    data={foods.map(food=>food.value)}
                     title="Foods"
                     options={{pageSizeOptions:[],pageSize:10}}
                     editable={{

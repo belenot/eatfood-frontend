@@ -27,33 +27,30 @@ function App() {
   const [state, dispatch] = useReducer(reducer, {...testState});
   const client = state.client
   const classes = useStyles();
-  useEffect(function(){
-    fetch("/client/me").then(function (response) {
-      if (response.ok) {
-        response.json().then(client=>dispatch({type: 'INIT_CLIENT_OK', payload: {client}}))
-        api.getFoods(foods=>dispatch({type: 'INIT_FOODS_OK', payload: {foods}}));
-        api.getPortions(portions=>dispatch({type: 'INIT_PORTIONS_OK', payload: {portions}}));
-      } else {
-        dispatch({type: 'INIT_CLIENT_ERROR'})
-      }
-    })
-  }, [])
+  // useEffect(function(){
+  //   fetch("/client/me").then(function (response) {
+  //     if (response.ok) {
+  //       response.json().then(client=>dispatch({type: 'INIT_CLIENT_OK', payload: {client}}))
+  //       api.getFoods(foods=>dispatch({type: 'INIT_FOODS_OK', payload: {foods}}));
+  //       api.getPortions(portions=>dispatch({type: 'INIT_PORTIONS_OK', payload: {portions}}));
+  //     } else {
+  //       dispatch({type: 'INIT_CLIENT_ERROR'})
+  //     }
+  //   })
+  // }, [])
   return (
       <AppContext.Provider value={{state, dispatch, api: api}}>
-        {/* new added */}
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
           <Container id="app-container">
-            {/* <Grid container alignItems='center' alignContent='center' justify='center'> */}
-              {client.authenticated
-              ?
-              <React.Fragment>
+              {client.authenticated ?
+              (
+                <React.Fragment>
                 <Header />
                 <ContentPanel />
-              </React.Fragment>
-              :
-              <AuthenticationPanel /> 
-              }
-            {/* </Grid> */}
+                </React.Fragment>
+              ) : (
+                <AuthenticationPanel /> 
+              )}
           </Container>
         </MuiPickersUtilsProvider>
       </AppContext.Provider>
