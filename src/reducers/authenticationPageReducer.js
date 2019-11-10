@@ -1,4 +1,4 @@
-import { REGISTRATE, REQUEST_STATUS, HANDLE_AUTHENTICATION_PAGE } from "../actions";
+import { REGISTRATE, REQUEST_STATUS, HANDLE_AUTHENTICATION_PAGE, OK_STATUS, AUTHENTICATE, ERR_STATUS } from "../actions";
 
 function authenticationPageReducer(
     state={
@@ -9,11 +9,12 @@ function authenticationPageReducer(
             isRegistrating: false
         },
         inputs: {
-            login: '',
-            name: '',
+            username: '',
             password: '',
         },
-        activePage: 'registrationPage'
+        activePage: 'registrationPage',
+        authenticationError: '',
+        registrationError: ''
     },
     action
 ) {
@@ -28,6 +29,59 @@ function authenticationPageReducer(
                             ...state.client,
                             isRegistrating: true
                         }
+                    }
+                }
+                case OK_STATUS: {
+                    return {
+                        ...state,
+                        client: {
+                            id: payload.client.id,
+                            isAuthenticated: true,
+                            isRegistrating: false
+                        }
+                    }
+                }
+                case ERR_STATUS: {
+                    return {
+                        ...state,
+                        client: {
+                            ...state.client,
+                            isRegistrating: false
+                        },
+                        registrationError: error
+                    }
+                }
+            }
+        }
+        case AUTHENTICATE: {
+            switch(status) {
+                case REQUEST_STATUS: {
+                    return {
+                        ...state,
+                        client: {
+                            ...state.client,
+                            isAuthenticating: true
+                        }
+                    }
+                }
+                case OK_STATUS: {
+                    return {
+                        ...state,
+                        client: {
+                            ...state.client,
+                            isAuthenticated: true,
+                            isAuthenticating: false
+                        }
+                    }
+                }
+                case ERR_STATUS: {
+                    return {
+                        ...state,
+                        client: {
+                            ...state.client,
+                            isAuthenticating: false
+                        },
+                        authenticationError: error
                     }
                 }
             }
